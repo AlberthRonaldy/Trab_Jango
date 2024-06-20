@@ -13,6 +13,7 @@ struct movie {
     char *runtimeMinutes;
     char *genres;
     struct movie *next;  // Próximo filme na lista de adjacências
+    // TODO :: criar lista de vizinhos
 };
 
 struct adjacency_list {
@@ -125,6 +126,11 @@ void read_and_print_movies(const char *filename, struct adjacency_list *adj_list
             exit(EXIT_FAILURE);
         }
 
+        if (strncmp(tconst, "tt", 2) == 0) {
+            // Remove o prefixo "tt" deslocando o ponteiro
+            tconst += 2;
+        }
+
         new_movie->tconst = strdup(tconst);
         new_movie->titleType = strdup(titleType);
         new_movie->primaryTitle = strdup(primaryTitle);
@@ -134,6 +140,7 @@ void read_and_print_movies(const char *filename, struct adjacency_list *adj_list
         new_movie->endYear = strdup(endYear);
         new_movie->runtimeMinutes = strdup(runtimeMinutes);
         new_movie->genres = strdup(genres);
+        // Lista de Filmes Vizinhos 
         new_movie->next = NULL;
 
         add_movie_to_adj_list(adj_list, new_movie);
@@ -147,6 +154,7 @@ void read_and_print_movies(const char *filename, struct adjacency_list *adj_list
         printf("endYear: %s\n", new_movie->endYear);
         printf("runtimeMinutes: %s\n", new_movie->runtimeMinutes);
         printf("genres: %s\n", new_movie->genres);
+        printf("next: %s\n", new_movie->next);
         printf("\n");
 
         count++;
@@ -156,7 +164,7 @@ void read_and_print_movies(const char *filename, struct adjacency_list *adj_list
 }
 
 int main() {
-    const char *filename = "arquivos/datasets/title.basics.tsv";
+    const char *filename = "arquivos/title.basics.tsv";
     printf("Attempting to open file: %s\n", filename);
 
     struct adjacency_list movies_adj_list;
