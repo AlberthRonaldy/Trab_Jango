@@ -17,12 +17,112 @@ typedef struct neighbor {
 } neighbor;
 
 
+// Estrutura para representar um ator
+struct actor {
+    char *nconst;
+    char *name;
+    struct movie *movies;  // Lista encadeada de filmes de destaque
+};
+
 
 struct adjacency_list {
     struct movie **nodes;  // Array de nós da lista de adjacências
     size_t size;
     size_t capacity;
 };
+
+// Função para liberar a memória alocada para um ator, incluindo sua lista de filmes
+void free_actor(struct actor *actor) {
+    free(actor->nconst);
+    free(actor->name);
+    free(actor);
+}
+
+// Função de exemplo para imprimir os dados de um ator e seus filmes
+void print_actor_info(struct actor *actor) {
+    printf("nconst: %s\n", actor->nconst);
+    printf("name: %s\n", actor->name);
+
+    printf("Movies:\n");
+    struct movie *current_movie = actor->movies;
+    while (current_movie != NULL) {
+        printf("  tconst: %s\n", current_movie->tconst);
+        printf("  primaryTitle: %s\n", current_movie->primaryTitle);
+        current_movie = current_movie->next;
+    }
+}
+
+int actor_movie_list() {
+    const char* filename = "arquivos/name.basics.tsv";
+    printf("Attempting to open file: %s\n", filename);
+
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        perror("Error opening file");
+        fprintf(stderr, "Failed to open file: %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+
+    char line[1024];
+    fgets(line, sizeof(line), file);  // Skip header line
+
+    // Array dinâmico para armazenar os atores
+    struct actor **actors_array = malloc(10 * sizeof(struct actor *));
+    if (actors_array == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    int num_actors = 0;
+    while (fgets(line, sizeof(line), file) && num_actors < 10) {
+        struct actor *current_actor = malloc(sizeof(struct actor));
+        if (current_actor == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE);
+        }
+
+        current_actor->nconst = strdup(strtok(line, "\t"));
+        current_actor->name = strdup(strtok(NULL, "\t"));
+
+        // Inicializa a lista de filmes como vazia
+        current_actor->movies = NULL;
+
+        // Leitura dos filmes de destaque
+        char *t1 = strtok(NULL, "\t");  // Token para os filmes
+        char *t2 = strtok(NULL, "\t");  // Token para os filmes
+        char *t3 = strtok(NULL, "\t");  // Token para os filmes
+        char *movies_token = strtok(NULL, "\t");  // Token para os filmes
+        printf("%s", movies_token);
+        while (movies_token != NULL) {
+            char *token = strtok(movies_token, ",");
+            // Itera sobre cada token e imprime o ID do filme
+            while (token != NULL) {
+                printf("Movie ID: %s\n", token);
+                token = strtok(NULL, ",");
+            }
+            movies_token = strtok(NULL, "\t");
+        }
+
+        actors_array[num_actors++] = current_actor;
+    }
+
+    fclose(file);
+
+    // Imprime informações dos atores
+    for (int i = 0; i < num_actors; i++) {
+        printf("Actor %d:\n", i + 1);
+        print_actor_info(actors_array[i]);
+        printf("\n");
+    }
+
+    // Libera memória alocada
+    for (int i = 0; i < num_actors; i++) {
+        free_actor(actors_array[i]);
+    }
+    free(actors_array);
+
+    return 0;
+}
 
 // Função de hashing para mapear o tconst do filme para um índice na lista de adjacências
 size_t hash_function(const char *key, size_t size) {
@@ -158,6 +258,8 @@ int main() {
     read_and_print_movies(filename, &movies_adj_list);
 
     free_adjacency_list(&movies_adj_list);
+
+    actor_movie_list();
 
     return 0;
 }
