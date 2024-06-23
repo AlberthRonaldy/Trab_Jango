@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "tree.c"
 
-typedef struct movie {
-    char *tconst;
-    char *primaryTitle;
-    struct movie *next;
-    struct neighbor *node;
-    // TODO :: criar lista de vizinhos
-} movie;
+// typedef struct movie {
+//     char *tconst;
+//     char *primaryTitle;
+//     struct movie *next;
+//     struct neighbor *node;
+//     // TODO :: criar lista de vizinhos
+// } movie;
 
 
 typedef struct neighbor {
@@ -108,12 +109,12 @@ int actor_movie_list() {
 
     fclose(file);
 
-    // Imprime informações dos atores
-    for (int i = 0; i < num_actors; i++) {
-        printf("Actor %d:\n", i + 1);
-        print_actor_info(actors_array[i]);
-        printf("\n");
-    }
+    // // Imprime informações dos atores
+    // for (int i = 0; i < num_actors; i++) {
+    //     printf("Actor %d:\n", i + 1);
+    //     print_actor_info(actors_array[i]);
+    //     printf("\n");
+    // }
 
     // Libera memória alocada
     for (int i = 0; i < num_actors; i++) {
@@ -186,7 +187,7 @@ void free_adjacency_list(struct adjacency_list *adj_list) {
             current = current->next;
             free(temp->tconst);
             free(temp->primaryTitle);
-            free(temp->node);
+            // free(temp->node);
             free(temp->next);
             free(temp);
         }
@@ -195,7 +196,7 @@ void free_adjacency_list(struct adjacency_list *adj_list) {
 }
 
 // Função para ler e mostrar os filmes
-void read_and_print_movies(const char *filename, struct adjacency_list *adj_list) {
+void read_and_print_movies(node * tree, const char *filename, struct adjacency_list *adj_list) {
     FILE *file = fopen(filename, "r");
     if (!file) {
         perror("Error opening file");
@@ -207,7 +208,7 @@ void read_and_print_movies(const char *filename, struct adjacency_list *adj_list
     fgets(line, sizeof(line), file);  // Skip header line
 
     int count = 0;
-    while (fgets(line, sizeof(line), file) && count < 10) {
+    while (fgets(line, sizeof(line), file) && count < 500) {
         char *tconst = strtok(line, "\t");
         char *titleType = strtok(NULL, "\t");
         char *primaryTitle = strtok(NULL, "\t");
@@ -220,6 +221,7 @@ void read_and_print_movies(const char *filename, struct adjacency_list *adj_list
 
         // Cria um novo filme
         struct movie *new_movie = malloc(sizeof(struct movie));
+        //printf("%p", new_movie);
         if (new_movie == NULL) {
             fprintf(stderr, "Memory allocation failed\n");
             exit(EXIT_FAILURE);
@@ -234,32 +236,54 @@ void read_and_print_movies(const char *filename, struct adjacency_list *adj_list
         new_movie->primaryTitle = strdup(primaryTitle);
         // Lista de Filmes Vizinhos 
         new_movie->next = NULL;
-        new_movie->node = NULL;
+        // new_movie->node = NULL;
+
+        // Adicionando o elemento na arvore
+        insert(&tree, atoi(new_movie->tconst), (void *) new_movie);
 
         add_movie_to_adj_list(adj_list, new_movie);
 
-        printf("tconst: %s\n", new_movie->tconst);
-        printf("primaryTitle: %s\n", new_movie->primaryTitle);
-        printf("\n");
+        // printf("tconst: %s\n", new_movie->tconst);
+        // printf("primaryTitle: %s\n", new_movie->primaryTitle);
+        // printf("\n");
 
         count++;
     }
 
+    visit(tree);
+
     fclose(file);
 }
+
+// void print_adj_list(struct adjacency_list *adj){
+//     for (int i=0; i<adj->capacity; i++){
+//         if(adj->nodes[i]) {
+//             //printf("TESTE");
+//            printf("%s\n", (adj->nodes[i])->tconst);
+//             if((adj->nodes[i])->next != NULL) {
+//                 printf("NEXT TCONST ====> %s\n", ((adj->nodes[i])->next)->tconst);
+//             }
+//         }
+//     }
+// }
+
 
 int main() {
     const char *filename = "arquivos/title.basics.tsv";
     printf("Attempting to open file: %s\n", filename);
 
+    node * tree = NULL;
+
     struct adjacency_list movies_adj_list;
     init_adjacency_list(&movies_adj_list, 100);  // Inicializa com capacidade de 100
 
-    read_and_print_movies(filename, &movies_adj_list);
+    read_and_print_movies(tree, filename, &movies_adj_list);
+
+    //print_adj_list(&movies_adj_list);
 
     free_adjacency_list(&movies_adj_list);
 
-    actor_movie_list();
+    //actor_movie_list();
 
     return 0;
 }

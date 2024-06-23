@@ -4,10 +4,19 @@
 struct node;
 typedef struct node node;
 
+
+typedef struct movie {
+    char *tconst;
+    char *primaryTitle;
+    struct movie *next;
+    //struct neighbor *node;
+    // TODO :: criar lista de vizinhos
+} movie;
+
 struct node
 {
 	int    idFilme;
-    int    index;
+    movie ** index;
 	int    level;
 	node * left;
 	node * right;
@@ -24,22 +33,22 @@ void visit(node * n)
 	}
 }
 
-int search(node * n, int id){
-    if(!n) {
-        printf("Árvore vazia.");
-        return -1;
-    }
+// int search(node * n, int id){
+//     if(!n) {
+//         printf("Árvore vazia.");
+//         return -1;
+//     }
 
-    if (id == n->idFilme){
-        return n->index;
-    } 
-    if (id < n->idFilme) {
-        search(n->left, id);
-    }
-    if(id > n->idFilme){
-        search(n->right, id);
-    }
-}
+//     if (id == n->idFilme){
+//         return n->index;
+//     } 
+//     if (id < n->idFilme) {
+//         search(n->left, id);
+//     }
+//     if(id > n->idFilme){
+//         search(n->right, id);
+//     }
+// }
 
 void destruct(node * n)
 {
@@ -169,7 +178,7 @@ void insert_node(node ** n, node * m)
 	balance(n);
 }
 
-void insert(node ** n, int id, int index)
+void insert(node ** n, int id, movie ** index)
 {
 	node * m = (node *) malloc(sizeof(node));
 	if(m)
@@ -207,50 +216,4 @@ void erase(node ** n, int id)
 	}
 	
 	balance(n);
-}
-
-int main()
-{
-	node * n = NULL;
-	
-	insert(&n, 12, 1);
-	insert(&n,  3, 2);
-	insert(&n,  9, 3);
-	insert(&n, 61, 4);
-	insert(&n, 23, 5);
-	insert(&n, 50, 6);
-	insert(&n, 51, 7);
-	insert(&n, 64, 8);
-	insert(&n, 26, 9);
-	insert(&n, 68, 10); 
-	insert(&n, 42, 11);
-	insert(&n,  4, 12);
-	insert(&n,  6, 13);
-	insert(&n,  2, 14);
-	
-	visit(n);
-    printf("\n");
-    search(n, 12);
-    search(n, 3);
-    search(n, 9);
-    search(n, 61);
-    search(n, 23);
-    search(n, 50);
-    printf("\n");
-	
-	// erase(&n,  4);
-	// erase(&n,  3);
-	// erase(&n, 12);
-	// erase(&n, 68);
-	// erase(&n, 61);
-	// erase(&n,  9);
-	// erase(&n,  2);
-
-	
-	// visit(n);
-	// printf("\n");
-	
-	destruct(n);
-	
-	return 0;
 }
